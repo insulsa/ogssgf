@@ -1,0 +1,65 @@
+#!/bin/ruby2.5
+=begin
+
+.Dt OGSSGF 6
+
+.Sh NAME
+	ogssgf \- fetch game from online-go.com and write ogs file
+
+.Sh SYNOPSIS
+	ruby2.5 README 1000000 > 1000000.sgf
+
+.Sh DESCRIPTION
+	The file name of this file should indeed be "ogssgf.rb". Game
+	number 1000000 is the game played by O Meien and Lee Sedol on
+	October 21, 2014.
+	
+.Sh BUGS
+	This program lacks proper check for commandline argument. This
+	program does not handle pass. This program drops player names
+	and other game information.
+
+.Sh COPYING
+	Copyright (C) 2020 Cao Wenming <love@mailinator.com>
+
+	This program is free software; you can redistribute it and or
+	modify it it under the terms of the GNU General Public License
+	version 2, as published by the Free Software Foundation.
+
+	I decline to disclose whether this program is distributed with
+	good cause, intent, belief, or evil ones.
+
+	This program is distributed without warranty. See the GNU General
+	Public License for more details.
+
+	You should have received a copy of the GNU General Public
+	License along with this program; if not, write to the Free
+	Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+	Boston, MA 02110-1301 USA.
+
+=end
+
+require 'net/http'
+require 'json'
+
+# ruby ARGV[0] is $1, et cetera
+case ARGV.length
+	when 1
+	else
+		abort "invalid argument"
+	end
+
+r = Net::HTTP.get_response URI('https://online-go.com/api/v1/games/'+ARGV[0])
+case r.code
+	when "200"
+	else
+		abort "unexpected http #{r.code}"
+	end
+
+puts '('
+t = "abcdefghijklmnopqrs"
+p = 1
+for move in JSON.parse(r.body)['gamedata']['moves']
+	puts ";"+"BW"[p^=1]+"["+t[move[0]]+t[move[1]]+"]"
+	end
+puts ')'
